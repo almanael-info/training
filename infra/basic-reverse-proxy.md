@@ -16,7 +16,7 @@ Plus cas d'utilisation
 
 Un reverse proxy permet à l'inverse de concentrer l'accès à une resource interne.
 
-**GRAPH**
+![Proxy](Reverse_proxy_h2g2bob.svg.png)
 
 - Séparer la partie accessible depuis Internet avec le service lui-même, permet d'ajouter des règles de sécurités, ...
 - Permettre la séparation entre plusieurs service d'après le même Hostname
