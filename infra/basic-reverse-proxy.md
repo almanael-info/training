@@ -1,27 +1,56 @@
+class: center, middle, inverse
+
 # Reverse Proxy
+
+---
 
 ## Un proxy ?
 
 Un proxy est un intermédiare entre le client et le serveur d'une resource.
 
-Plus cas d'utilisation
 
-- Être Anonyme*
+---
+class: pic
+
+![Proxy](/infra/1280px-Proxy_concept_en.svg.png)
+
+---
+class: middle
+
+**quelques cas d'utilisation :**
+
+- Être anonyme
 - Partager un cache
-- Permet de maitriser l'accès de resource externe d'une entreprise à Internet*
+- Permet de maitriser l'accès de resource externe d'une entreprise à Internet
 
-![Proxy](1280px-Proxy_concept_en.svg.png)
+???
+
+- On n'est pas anonyme pour le service proxy
+- Le cache peut parfois contenir des infos personnelles
+
+---
 
 ## Un reverse proxy
 
 Un reverse proxy permet à l'inverse de concentrer l'accès à une resource interne.
 
-![Proxy](Reverse_proxy_h2g2bob.svg.png)
+---
+class: pic,center,middle
+
+![Reverse Proxy](/infra/Reverse_proxy_h2g2bob.svg.png)
+
+---
+class: middle
+
+**Intérêt:**
 
 - Séparer la partie accessible depuis Internet avec le service lui-même, permet d'ajouter des règles de sécurités, ...
 - Permettre la séparation entre plusieurs service d'après le même Hostname
 - Permet de mettre en cache du contenu statique 
 - Déléguer la partie TLS au reverse proxy
+
+---
+class: middle
 
 ### DNS
 
