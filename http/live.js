@@ -169,6 +169,7 @@
         case "application/javascript":
         case "application/x-javascript":
         case "application/octet-stream":
+        case "text/markdown":
           document.location.reload();
       }
     },
