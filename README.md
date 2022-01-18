@@ -3,10 +3,12 @@ Quelques cours disponibles
 
 
 ```
-$ python3 -m http.serve
-$ firefox http://localhost:8000/slide/index.html
+$ python3 run.py
+$ firefox http://localhost:8000/
 ```
 
 # TODO
 
-- Convert http.server to use HEAD and 304
+- Use / to list all slides availables
+- Allow parameter for http/index.html to accept markdown parameter
+
