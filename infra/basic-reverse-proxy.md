@@ -8,14 +8,14 @@ class: center, middle, inverse
 
 Un proxy est un intermédiare entre le client et le serveur d'une resource.
 
-
 ---
-class: pic
+class: pic,middle,center
 
 ![Proxy](/infra/1280px-Proxy_concept_en.svg.png)
 
 ---
 class: middle
+
 
 **quelques cas d'utilisation :**
 
@@ -29,8 +29,9 @@ class: middle
 - Le cache peut parfois contenir des infos personnelles
 
 ---
+class: middle,center
 
-## Un reverse proxy
+## Reverse proxy
 
 Un reverse proxy permet à l'inverse de concentrer l'accès à une resource interne.
 
@@ -44,25 +45,118 @@ class: middle
 
 **Intérêt:**
 
-- Séparer la partie accessible depuis Internet avec le service lui-même, permet d'ajouter des règles de sécurités, ...
-- Permettre la séparation entre plusieurs service d'après le même Hostname
+- Séparer la partie accessible depuis Internet avec le service lui-même
+    - un point d'accès unique
+    - permet d'ajouter des règles de sécurités
+- Permettre la séparation entre plusieurs service pour le même domaine
 - Permet de mettre en cache du contenu statique 
 - Déléguer la partie TLS au reverse proxy
+
+???
+
+- Attention au contenu statique mais souvent plus simple car on maitrise le site
+
+---
+class: middle
+
+## Apache HTTP
+
+Historiquement le premier projet de la fondation Apache, lorsqu'on parle 
+du serveur apache, il faudrait parler du server httpd d'Apache. 
+
+???
+
+Couteau suisse avec la possibilité d'ajouter plein de modules
+
+---
+class: middle
+
+## Installation
+
+```bash
+$ apt update
+$ apt install -y apache2
+$ curl -I http://localhost/
+HTTP/1.1 200 OK
+...
+```
+
+???
+
+Pour ubuntu 20.04
+
+---
+class: middle
+
+## Configuration nouveau site
+
+Site statique
+
+```bash
+$ cat <<EOF >/etc/apache2/sites-available/example.conf
+<VirtualHost *:80>
+  ServerName example.vcap.me
+  DocumentRoot /var/www/html
+</VirtualHost>
+EOF
+$ a2ensite example.conf
+Enabling site exemple.
+$ systemctl reload apache2
+```
+
+???
+*.vcap.me redirige tout les sous domaines vers 127.0.0.1 qui est une addresse locale à tout les ordinateurs
+
+---
+class: middle
+
+## Configuration reverse-proxy
+
+```bash
+$ a2enmod proxy_http # à ne faire qu'une fois
+# éditer le fichier /etc/apache2/sites-available/example.conf
+# remplace DocumentRoot /var/www/html
+# par ProxyPass / http://127.0.0.1:8000/
+$ systemctl restart apache2
+```
+
+Quel va être le résultat ?
+
+???
+
+Attention: on a rajoute un nouveau module d'où le restart au lieu de reload
+
+---
+class: middle
+
+## 503 Service unavailable
+
+Apache HTTP veut contacter le service web sur 127.0.0.1:8000
+
+Lançons un service
 
 ---
 class: middle
 
 ### DNS
 
-Un DNS est l'association IP (le protocole Internet) au nom de domaine.
-Pour plein de raison, l'IP associé à un nom de domaine est gardé en cache par tout les serveurs intermédiaires.
+Le DNS:
+- associe une IP (l'adresse logique) au nom de domaine
 
-***à supprimer ou simplifier***:
+```shell
+$ ping -c1 perdu.com
+PING perdu.com (208.97.177.124) 56(84) bytes of data.
+```
 
-Le site www.perdu.com est associé à l'IP 208.97.177.124, c'est un enregistrement de type A (on pourrait dire bas niveau), avec très souvent un temps de cache de 24h.
-A chaque enregistrement de type A, il est possible d'ajouter des enregistrement de type CNAME.
+---
+class: middle
 
-### Questionnaire
+---
+
+???
+
+---
+class: middle
 
 **A REECRIRE**
 
@@ -80,9 +174,6 @@ Lorsqu'un serveur HTTP reçoit une requête, il analyse le champ `Host` pour sav
 
 
 ### Apache httpd
-
-Historiquement le premier projet de la fondation Apache, lorsqu'on parle 
-du serveur apache, il faudrait parler du server httpd d'Apache. 
 
 ### Exemples
 
