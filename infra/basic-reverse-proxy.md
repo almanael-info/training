@@ -14,7 +14,7 @@ En français, un serveur mandataire
 ---
 class: pic,middle,center
 
-![Proxy](/infra/1280px-Proxy_concept_en.svg.png)
+![Proxy](infra/1280px-Proxy_concept_en.svg.png)
 
 ---
 class: middle
@@ -40,7 +40,7 @@ Un reverse proxy permet à l'inverse d'imposer le passage à un serveur pour l'a
 ---
 class: pic,center,middle
 
-![Reverse Proxy](/infra/Reverse_proxy_h2g2bob.svg.png)
+![Reverse Proxy](infra/Reverse_proxy_h2g2bob.svg.png)
 
 ---
 class: middle
@@ -280,7 +280,7 @@ class: middle, center
 
 # Les pièges
 
-[!Proxy](/infra/error_proxy.png)
+[!Proxy](infra/error_proxy.png)
 
 
 ---
@@ -297,7 +297,7 @@ Avoir un VirtualHost par défaut qui sera nommé 000-default par example avec un
 ---
 class: middle
 
-![Proxy](/infra/logs.jpg)
+![Proxy](infra/logs.jpg)
 
 Regarder les logs du service ET du reverse-proxy 
 (configuration pas aligné par exemple)
