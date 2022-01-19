@@ -60,12 +60,15 @@ class: middle
 - Mise à jour des certificats sans faire d'interruption de service
 
 ---
-class: middle
+class: middle,pic
 
 ## Apache HTTP
 
+![Apache](infra/apache.png)
+
+
 Historiquement le premier projet de la fondation Apache, lorsqu'on parle 
-du serveur apache, il faudrait parler du server httpd d'Apache. 
+du serveur apache, il faudrait parler du server http d'Apache. 
 
 ???
 
@@ -222,10 +225,12 @@ HTTP 1.1 ! (1999)
 ---
 class: middle
 
-## tester sans nom de domaine
+## Test en local
 
-Dans l'exemple, on va utiliser vcap.me qui redirige tout les sous domaines
+Dans l'exemple, on va utiliser `vcap.me` qui redirige tout les sous domaines
 vers l'IP local à l'ordinateur (127.0.0.1)
+
+*note* il est possible d'utiliser `/etc/hosts`
 
 ???
 
@@ -236,14 +241,15 @@ class: middle
 
 ## Virtual Host 1
 
-Pour les curieux, voir l'annexe HTTP/1.1
 
 - Editons le fichier `/etc/apache2/sites-available/example.conf`
-- Ajoutons la ligne `ServerName example.vcap.me`
-- Et chargement des paramètres 
-```bash
-```
+- Ajoutons les lignes
+- `ServerName example.vcap.me`
+- `ServerAlias exemple.vcap.me`
+
 ???
+
+Permet d'avoir une seule configuration pour plusieurs domaines
 
 ---
 class: middle
@@ -251,37 +257,47 @@ class: middle
 ## Virtual Host 2
 
 ```bash
-$ cat <<EOF >/etc/apache2/sites-availables/perdu/conf`
+$ cat <<EOF >/etc/apache2/sites-availables/perdu.conf`
 <VirtualHost *:80>
     ProxyPass 127.0.0.1:8001
     ServerName perdu.vcap.me
 </VirtualHost>
 EOF
+$ systemctl reload apache2
 ```
 
 ???
 
-Note: on utilise ici un autre port !
+Note: on utilise ici un autre port pour la destination
 
 ---
 class: middle
 
 ## Résultat
 
-
 ---
 class: middle, center
 
 # Les pièges
 
+[!Proxy](/infra/error_proxy.png)
+
+
 ---
 class: middle
+
+### Mauvais site
 
 Utiliser une IP ou un nom de domaine qui est résolu sur la même IP.
-=> 
+
+`perdu.vcap.me` & `example.vcap.me` mais `toto.vcap.me` sera aussi résolu
+
+Avoir un VirtualHost par défaut qui sera nommé 000-default par example avec une page d'erreur statique
 
 ---
 class: middle
+
+![Proxy](/infra/logs.jpg)
 
 Regarder les logs du service ET du reverse-proxy 
 (configuration pas aligné par exemple)
@@ -294,6 +310,22 @@ class: middle
 ```bash
 $ apache2ctl -t
 Syntax OK
+```
+
+---
+class: middle
+
+## Les headers
+
+Certaines entêtes sont généralement présente pour un reverse proxy
+
+```
+# l'IP du client
+X-Forwarded-For: 127.0.0.1
+# le nom de domaine reçu par Apache
+X-Forwarded-Host: example.vcap.me
+# le nom de domaine résolu par Apache
+X-Forwarded-Server: example.vcap.me
 ```
 
 ---
@@ -358,14 +390,55 @@ VirtualHost avec Location
 </VirtualHost>
 ```
 
+---
+class: middle
 
+## DNS
 
-GET test.com/static => Reverse Proxy => Service 2
+Les types d'enregistrement DNS
 
-GET admin.test.com => Reverse Proxy => Service 3
-
-Avec un seul serveur exposé sur Internet, il est possible d'attaquer plusieurs services en interne.
-
-
-Après chaque modif de conf, il est recommandé de faire une vérification avant de relancer Apache pour éviter d'avoir une interruption 
+```bash
+A     IPv4
+AAAA  IPv6
+MX    Serveur de mail
+CNAME (sous)-Domaine qui pointe vers un autre nom de domaine
+TXT   Ajoute des propriétés à un nom de domaine
 ```
+
+???
+
+CNAME => les enregistrements CNAME associé à un type A vont partager le même cache
+
+TXT => certains sites vous demande d'un ajouter pour prouver que vous en êtes propriétaires
+
+---
+class: middle
+
+## TLS
+
+Prérequis:
+- avoir un nom de domaine
+- un serveur accessible depuis Internet via le domaine
+- un VirtualHost configuré avec www.domain.org & domain.org 
+Installation
+```bash
+$ apt  install -y certbot python3-certbot-apache
+[...]
+$ certbot --apache
+
+
+---
+class: middle, center
+
+# QUESTIONS
+
+
+---
+class: middle
+
+**References**
+
+- Certbot: https://urlz.fr/hbLg
+- Apache HTTP: https://urlz.fr/hbLh
+- DNS: https://urlz.fr/hbLj
+- Wireshark: https://urlz.fr/hbLl
