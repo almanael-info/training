@@ -2,6 +2,8 @@
 
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
+BIND = "0.0.0.0"
+PORT = 8000
 
 class Handler(SimpleHTTPRequestHandler):
     def do_HEAD(self) -> None:
@@ -16,7 +18,9 @@ class Handler(SimpleHTTPRequestHandler):
 
 
 def run_server():
-    http = HTTPServer(("0.0.0.0", 8000), Handler)
+    print("Listening on %s:%d"  % (BIND, PORT))
+
+    http = HTTPServer((BIND, PORT), Handler)
     http.serve_forever()
 
 

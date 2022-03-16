@@ -51,7 +51,7 @@ class: middle
     - un point d'accès unique
     - permet d'ajouter des règles de sécurités
 - Permettre la séparation entre plusieurs service pour le même domaine
-- Permet de mettre en cache du contenu statique 
+- Permet de mettre en cache du contenu statique
 - Déléguer la partie TLS au reverse proxy
 
 ???
@@ -67,8 +67,8 @@ class: middle,pic
 ![Apache](infra/apache.png)
 
 
-Historiquement le premier projet de la fondation Apache, lorsqu'on parle 
-du serveur apache, il faudrait parler du server http d'Apache. 
+Historiquement le premier projet de la fondation Apache, lorsqu'on parle
+du serveur apache, il faudrait parler du server http d'Apache.
 
 ???
 
@@ -218,7 +218,7 @@ Une idée ?
 
 nslookup permet de interroger les différents enregistrements lié
 à un nom de domain
-(mail, ...) 
+(mail, ...)
 HTTP 1.1 ! (1999)
 
 
@@ -299,7 +299,7 @@ class: middle
 
 ![Proxy](infra/logs.jpg)
 
-Regarder les logs du service ET du reverse-proxy 
+Regarder les logs du service ET du reverse-proxy
 (configuration pas aligné par exemple)
 
 ---
@@ -331,7 +331,7 @@ X-Forwarded-Server: example.vcap.me
 ---
 class: middle, center
 
-# ANNEXE 
+# ANNEXE
 
 ---
 class: middle
@@ -342,7 +342,7 @@ Le nom de domaine de la requête est envoyé au serveur,
 permettant ainsi à celui ci de savoir quel Virtual Host
 utilisé
 ```bash
-$ curl -vIs http://toto.vcap.me 
+$ curl -vIs http://toto.vcap.me
 HEAD / HTTP/1.1
 Host: toto.vcap.me
 ...
@@ -419,7 +419,7 @@ class: middle
 Prérequis:
 - avoir un nom de domaine
 - un serveur accessible depuis Internet via le domaine
-- un VirtualHost configuré avec www.domain.org & domain.org 
+- un VirtualHost configuré avec www.domain.org & domain.org
 Installation
 ```bash
 $ apt  install -y certbot python3-certbot-apache

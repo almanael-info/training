@@ -2,10 +2,40 @@
   <head>
     <style>
 
+      .remark-slide-content {
+        background: cornflowerblue;
+        color: black;
+      }
+
       div.pic p img {
         width: 100%;
         max-height: unset;
         max-width: unset;
+      }
+
+      div.smallpic p img {
+        width: 40%;
+        max-height: unset;
+        max-width: unset;
+      }
+
+      .inverse {
+        background: #272822;
+        color: #777872;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+      .blue {
+        background: cornflowerblue;
+        color: #777872;
+        text-shadow: 0 0 20px #333;
+      }
+      .blue h1, .blue h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
       }
     </style>
   </head>
@@ -16,14 +46,12 @@
     <script type="text/javascript">
 
         var slideshow = remark.create({
-
-            sourceUrl: "/infra/basic-reverse-proxy.md"
-
+            sourceUrl: "/infra/docker-basic.md"
         });
 
     </script>
 
-    <script src="/infra/basic-reverse-proxy.md" type="application/octet-stream"></script>
+    <script src="/infra/docker-basic.md" type="application/octet-stream"></script>
 
     <script src="http/live.js" type="text/javascript"></script>
 
