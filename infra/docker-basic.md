@@ -55,7 +55,7 @@ class: middle,smallpic,center
 
 ## Comparaison Virtu / Docker
 
-![Virtu](/infra/docker-virtual-machines.png) / 
+![Virtu](/infra/docker-virtual-machines.png) /
 ![Docker](/infra/docker-containers.png)
 
 
@@ -74,10 +74,8 @@ class: middle
 ---
 class: middle
 
-## Demo time
-
-???
-- PHP 5 and PHP 7
+## Les composants
+![Component](/infra/docker-components.png)
 
 ---
 class: middle
@@ -89,6 +87,8 @@ docker inspect
 docker ps
 docker images
 docker build
+...
+docker help
 ```
 
 ---
@@ -109,7 +109,7 @@ class: middle
 $ docker run hello-world
 Unable to find image 'hello-world:latest' locally
 latest: Pulling from library/hello-world
-2db29710123e: Pull complete 
+2db29710123e: Pull complete
 Digest: sha256:4c5f3db4f8a54eb1e017c385f683a2de6e06f75be442dc32698c9bbe6c861edd
 Status: Downloaded newer image for hello-world:latest
 
@@ -139,7 +139,7 @@ Le nom d'une image docker est `vendor/name:tag`
 - `tag`: la version de l'image, si absent, c'est le tag `latest` qui est utilisé
 
 Une même image peut être tagger plusieurs fois:
-- L'image nginx:1.20 est aussi taggé nginx:1.20.2 
+- L'image nginx:1.20 est aussi taggé nginx:1.20.2
 - le tag 1.20 représente la dernière version stable de la branche 1.20
 - alors que 1.20.2 représente spécifiquement cette version de bugfix.
 
@@ -236,6 +236,7 @@ Cloner ce répertoire http://github.com/Cristy94/markdown-blog.git et le déploy
 - faites pas à pas
 - partir d'une image dont vous maitrisez l'OS
 - utiliser apache comme serveur web
+- bonus: faire fonctionner le .htaccess
 
 ???
 Docker build context
@@ -244,20 +245,32 @@ Layer
 ---
 class: middle
 
-##  Exemple
+##  Une solution
 
 ```
+$ cat .dockerignore
+.git
+$ cat blog.conf
+<VirtualHost *:80>
+  DocumentRoot /var/www/markdown-blog
+  <Directory /var/www/markdown-blog/>
+    AllowOverride all
+  </Directory>
+  ErrorLog ${APACHE_LOG_DIR}/error.log
+  CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
 $ cat Dockerfile
 FROM ubuntu:20.04
-
 ENV TZ="Europe/Paris"
 ENV DEBIAN_FRONTEND=noninteractive
-
 RUN apt update && \
     apt install -yy apache2 php libapache2-mod-php tzdata && \
     apt clean && \
-    a2enmod rewrite
-COPY . /var/www/html/
+    a2enmod rewrite && \
+    rm /etc/apache2/sites-enabled/000-default.conf
+COPY blog.conf /etc/apache2/sites-enabled/
+COPY markdown-blog/ /var/www/
+EXPOSE 80
 CMD  [ "apachectl", "-D", "FOREGROUND"]
 ```
 
@@ -288,7 +301,7 @@ $ docker volume inspect mydata
         "Scope": "local"
     }
 ]
-$ docker run -v mydata:/inside-container -it alpine 
+$ docker run -v mydata:/inside-container -it alpine
 ```
 
 ---
@@ -304,7 +317,7 @@ dev      lib      my-home  root     srv      usr
 etc      media    opt      run      sys      var
 ```
 
-**⚠** 
+**⚠**
 - un volume nommé sera crée automiquement (absence de / comme suffix)
 - un répertoire sera crée automatiquement s'il n'existe pas
 
@@ -315,12 +328,12 @@ class: middle
 
 `EXPOSE` indique à Docker et à l'utilisateur que l'appli écoutera sur ce(s) port(s)
 
-=>
-Par défaut Docker utilise une interface réseau virtuelle (bridge sous linux)
+- Par défaut Docker utilise une interface réseau virtuelle (bridge sous linux)
 Chaque instance aura une IP attaché à ce réseau virtuelle.
-
-=>
-Il est possible d'exposer un port d'un docker sur l'interface de votre PC
+- Il est possible d'exposer un port d'un docker sur l'interface de votre PC:
+```
+$ docker run -d -p 9090:80 -t nginx
+```
 
 ???
 Attention
@@ -393,10 +406,10 @@ services:
   mysql:
     image: "mysql:8"
     environment:
-      - MYSQL_DATABASE=reppop
-      - MYSQL_USER=reppop
-      - MYSQL_PASSWORD=reppop
-      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=mydb
+      - MYSQL_USER=myuser
+      - MYSQL_PASSWORD=secret
+      - MYSQL_ROOT_PASSWORD=supersecret
 ```
 
 ---
@@ -405,13 +418,17 @@ class: middle
 ## Run
 
 ```
-# crée le réseaun construit / récupère les images, démarre tout
+# crée le réseaun construit / récupère & construit les images, démarre tout
 $ docker-compose up
-
-# détruit le réseau
+[...]
+# détruit le réseau et les containers
 $ docker-compose down
 ```
-
+Quelques commandes:
+```
+$ docker-compose ps
+$ docker-compose exec helloworld /bin/bash
+```
 
 ---
 class: middle
@@ -437,9 +454,10 @@ Dans l'exemple précédent, l'application peut tomber en erreur car
 l'application va démarrer en même temps que mysql.
 
 ```
-version: "3.9"
+version: "3.8"
 services:
   web:
+    platform: linux/amd64
     build: .
     depends_on:
       - db
@@ -447,7 +465,8 @@ services:
   redis:
     image: redis
   db:
-    image: postgres
+    image: mysql
+    platform: linux/amd64
 ```
 
 **note** le timeout par défaut sur les services peut être trop court parfois
@@ -462,6 +481,87 @@ Déployons votre application Laravel dans Docker Compose
 ---
 class: middle
 
+## Un env dédié à Docker
+
+Copier .env en .env.docker
+modifier la connection à la DB comme ceci:
+
+```
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=laravel_db
+DB_USERNAME=laravel_user
+DB_PASSWORD=laravel_secret
+```
+
+---
+class: middle
+
+## Dockerfile
+
+```
+FROM ubuntu:20.04
+
+ENV APP_ENV=docker
+ENV TZ="Europe/Paris"
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt update -qq
+RUN apt install software-properties-common
+RUN add-apt-repository ppa:ondrej/php
+RUN apt update -qq
+RUN apt install -qq -yy tzdata && \
+    apt install -qq -yy php8.0-cli php8.0-xml php8.0-mbstring \
+                        git unzip wget php8.0-curl php8.0-gd \
+                        php8.0-zip php8.0-mysql
+RUN wget https://raw.githubusercontent.com/composer/getcomposer.org/76a7060ccb93902cd7576b67264ad91c8a2700e2/web/installer -O - -q | php -- --quiet && \
+    mv composer.phar /usr/bin && \
+    chmod +x /usr/bin/composer.phar
+# prepare dedicated user
+RUN useradd -ms /bin/bash basicuser && \
+    mkdir /home/basicuser/service && \
+    chown basicuser:basicuser /home/basicuser/service
+COPY --chown=basicuser:basicuser . /home/basicuser/service
+
+# fetch project dependencies
+USER basicuser
+WORKDIR /home/basicuser/service
+RUN composer.phar update
+
+ENTRYPOINT [ "php", "artisan" ]
+CMD [ "serve", "--host=0.0.0.0" ]
+```
+
+---
+class: middle
+
+### docker-compose.yml
+
+```
+version: '3.8'
+
+services:
+  laravel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platform: linux/amd64
+    ports:
+      - "8000:8000"
+  mysql:
+    image: "mysql:5.7"
+    platform: linux/amd64
+    environment:
+      - MYSQL_DATABASE=laravel_db
+      - MYSQL_USER=laravel_user
+      - MYSQL_PASSWORD=laravel_secret
+      - MYSQL_ROOT_PASSWORD=adminsecret
+```
+
+---
+class: middle
+
 ## Attention
 
 - Pas de secret dans le docker-compose.yml !
@@ -472,7 +572,7 @@ class: middle
 
 ## Entracte : Apache HTTP / Reverse Proxy
 
-Boring stuff...
+Boring stuff... but already partially covered
 
 ---
 class: middle
@@ -484,3 +584,16 @@ class: middle
 - Me communiquer un nom pour que je puisse renseigner un DNS
 - Se connecter sur dockerworkshop.murlock.org avec votre user
 - Editons ensemble le fichier de conf d'apache !
+
+---
+class: middle
+
+### Docker Hub
+
+Après avoir validé votre compte chez Docker:
+
+```
+$ docker login -u <mon_nom_de_compte_chez_docker>
+$ docker tag monapplication <mon_nom_de_compte_chez_docker>/monapplication
+$ docker push <mon_nom_de_compte_chez_docker>/monapplication
+```
